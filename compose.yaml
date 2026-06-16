@@ -1,0 +1,7 @@
+services:
+  minecraft-authorize:
+    image: minecraft-authorize
+    build:
+      context: .
+      dockerfile: vless-proxy/Dockerfile
+
