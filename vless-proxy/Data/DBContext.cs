@@ -11,6 +11,7 @@ public class DBContext : DbContext
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<SystemSettings> SystemSettings { get; set; }
     public DbSet<Invite> Invites { get; set; }
+    public DbSet<ApiKey> ApiKeys { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using vless_proxy.Contracts.Request.Settings;
-using vless_proxy.Contracts.Response;
+using vless_proxy.Contracts.Response.Settings;
 using vless_proxy.Filters;
 using vless_proxy.Models;
 
@@ -12,7 +12,7 @@ public class SystemSettingsEndpoints : ICarterModule
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/settings").AddEndpointFilter<SessionAuthFilter>();
+        var group = app.MapGroup("/api/settings").AddEndpointFilter<AdminAuthFilter>();
 
         group.MapGet("/", GetSettingsHandler);
         group.MapPatch("/", PatchSettingsHandler);

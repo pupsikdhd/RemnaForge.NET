@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using vless_proxy.Contracts.Contracts.Request;
-using vless_proxy.Contracts.Response;
+using Microsoft.Extensions.Caching.Memory;
+using vless_proxy.Contracts.Request.Client;
+using vless_proxy.Contracts.Response.Client;
+using vless_proxy.Contracts.Response.Device;
 using vless_proxy.Crypto;
 using vless_proxy.Filters;
 using vless_proxy.Models;
@@ -11,7 +13,7 @@ public class ClientEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/clients").AddEndpointFilter<SessionAuthFilter>();
+        var group = app.MapGroup("/api/clients").AddEndpointFilter<AdminAuthFilter>();
         
         group.MapGet("/", GetClientsHandler);
         group.MapPost("/", CreateClientHandler);
@@ -33,7 +35,7 @@ public class ClientEndpoints : ICarterModule
         return Results.Ok(new {success = true});
     }
 
-    private static async Task<IResult> PatchClientHandler(PatchClientRequest request, DBContext context)
+    private static async Task<IResult> PatchClientHandler(PatchClientRequest request, DBContext context, IMemoryCache memoryCache)
     {
         var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == request.Id);
         if (client == null)
@@ -45,7 +47,7 @@ public class ClientEndpoints : ICarterModule
         }
         
         client.ExpireAt = request.ExpireAt == null ? client.ExpireAt : request.ExpireAt.Value;
-        client.Name = request.Name == null ? client.Name : request.Name;
+        client.Name = request.Name ?? client.Name;
             
         context.Clients.Update(client);
         await context.SaveChangesAsync();
@@ -61,11 +63,16 @@ public class ClientEndpoints : ICarterModule
             ExpireAt = client.ExpireAt
         };
         
+        if (memoryCache.TryGetValue($"last_sub_update_{dto.Id}", out DateTime lastUpdated))
+        {
+            dto.LastUpdated = lastUpdated;
+        }
+        
         return Results.Ok(dto);
     }
     
     
-    private static async Task<IResult> CreateClientHandler(CreateClientRequest request, DBContext context, CryptoService  cryptoService)
+    private static async Task<IResult> CreateClientHandler(CreateClientRequest request, DBContext context, CryptoService cryptoService)
     {
         if (request.SubscriptionId == Guid.Empty)
             return Results.BadRequest(new {success = false, message = "SubscriptionId is required"});
@@ -96,7 +103,8 @@ public class ClientEndpoints : ICarterModule
             Name = client.Name,
             DeviceLimit = client.DeviceLimit,
             CreatedAt = client.CreatedAt,
-            ExpireAt = client.ExpireAt
+            ExpireAt = client.ExpireAt,
+            LastUpdated = null
         };
         
         return Results.Ok(dto);
@@ -106,7 +114,7 @@ public class ClientEndpoints : ICarterModule
     
     
     
-    private static async Task<IResult> GetClientsHandler(DBContext context)
+    private static async Task<IResult> GetClientsHandler(DBContext context, IMemoryCache memoryCache)
     {
         var dtos = await context.Clients
             .AsNoTracking()
@@ -121,6 +129,14 @@ public class ClientEndpoints : ICarterModule
                 ExpireAt = c.ExpireAt
             })
             .ToListAsync();
+
+        foreach (var dto in dtos)
+        {
+            if (memoryCache.TryGetValue($"last_sub_update_{dto.Id}", out DateTime lastUpdated))
+            {
+                dto.LastUpdated = lastUpdated;
+            }
+        }
 
         return Results.Ok(dtos);
     }

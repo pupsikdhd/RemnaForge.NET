@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using vless_proxy.Contracts.Request.Subscription;
-using vless_proxy.Contracts.Response;
+using vless_proxy.Contracts.Response.Subscription;
 using vless_proxy.Filters;
 using vless_proxy.Models;
 
@@ -10,7 +10,7 @@ public class SubscriptionEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/subscriptions").AddEndpointFilter<SessionAuthFilter>();
+        var group = app.MapGroup("/api/subscriptions").AddEndpointFilter<AdminAuthFilter>();
         
         group.MapGet("/", GetSubscriptionsHandler);
         group.MapPost("/", CreateSubscriptionHandler);

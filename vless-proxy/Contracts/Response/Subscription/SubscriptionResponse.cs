@@ -1,4 +1,4 @@
-﻿namespace vless_proxy.Contracts.Response;
+namespace vless_proxy.Contracts.Response.Subscription;
 
 public class SubscriptionResponse
 {

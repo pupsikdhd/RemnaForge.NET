@@ -20,7 +20,7 @@ public class AuthService
     
     public string CreateSession(Guid userId, string UserName)
     {
-        var sessionToken = _crypto.GetCode(32);
+        var sessionToken = _crypto.GetCode(64);
         var session = new Session()
         {
             Id = Guid.NewGuid(),

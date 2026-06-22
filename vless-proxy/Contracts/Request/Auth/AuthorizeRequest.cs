@@ -1,4 +1,4 @@
-namespace vless_proxy.Contracts.Contracts.Request;
+namespace vless_proxy.Contracts.Request.Auth;
 
 public class AuthorizeRequest
 {

@@ -1,6 +1,7 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using Konscious.Security.Cryptography;
+using Microsoft.Extensions.Configuration;
 
 namespace vless_proxy.Crypto;
 
@@ -9,6 +10,25 @@ public class CryptoService
     private const int DegreeOfParallelism = 4;
     private const int MemorySize = 65536;
     private const int Iterations = 4;
+    private readonly byte[] _encryptionKey;
+
+    public CryptoService(IConfiguration configuration)
+    {
+        var keyString = configuration["TOTPEncryptionKey"] ?? "vless-proxy-default-secure-totp-encryption-key-32chars";
+        _encryptionKey = SHA256.HashData(Encoding.UTF8.GetBytes(keyString));
+    }
+
+    public string Encrypt(string plainText)
+    {
+        if (string.IsNullOrEmpty(plainText)) return string.Empty;
+        return AES_Module.Encrypt(plainText, _encryptionKey);
+    }
+
+    public string Decrypt(string cipherText)
+    {
+        if (string.IsNullOrEmpty(cipherText)) return string.Empty;
+        return AES_Module.Decrypt(cipherText, _encryptionKey);
+    }
 
     public string GetCode(int length = 8)
     {
@@ -72,4 +92,7 @@ public class CryptoService
             return CryptographicOperations.FixedTimeEquals(computedHash, originalHash);
         }
     }
+    
+    
+
 }

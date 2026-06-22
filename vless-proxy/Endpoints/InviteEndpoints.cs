@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using vless_proxy.Contracts.Request.Invite;
-using vless_proxy.Contracts.Response;
+using vless_proxy.Contracts.Response.Invite;
 using vless_proxy.Filters;
 using vless_proxy.Models;
 
@@ -10,7 +10,7 @@ public class InviteEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/invites").AddEndpointFilter<SessionAuthFilter>();
+        var group = app.MapGroup("/api/invites").AddEndpointFilter<AdminAuthFilter>();
         
         group.MapGet("/", GetInvitesHandler);
         group.MapPost("/", CreateInviteHandler);

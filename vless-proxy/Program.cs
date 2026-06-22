@@ -24,6 +24,20 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0 
             });
     });
+
+    options.AddPolicy("public-sub-limiter", httpContext =>
+    {
+        var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: clientIp,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 2,
+                Window = TimeSpan.FromSeconds(10),
+                QueueLimit = 0 
+            });
+    });
 });
 
 builder.Services.AddDbContext<DBContext>(options =>
@@ -50,6 +64,7 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+builder.Services.AddSingleton<OTP_Module>();
 builder.Services.AddSingleton<CryptoService>();
 builder.Services.AddScoped<AuthService>();
 
@@ -102,4 +117,5 @@ foreach (var module in modules)
     instance.AddRoutes(app);
 }
 app.MapFallbackToFile("index.html");
+app.UseForwardedHeaders();
 app.Run();

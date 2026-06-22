@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace vless_proxy.Contracts.Contracts.Request;
+namespace vless_proxy.Contracts.Request.Client;
 
 public class PatchClientRequest
 {

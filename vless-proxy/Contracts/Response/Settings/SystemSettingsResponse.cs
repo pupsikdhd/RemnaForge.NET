@@ -1,4 +1,4 @@
-﻿namespace vless_proxy.Contracts.Response;
+namespace vless_proxy.Contracts.Response.Settings;
 
 public class SystemSettingsResponse
 {
